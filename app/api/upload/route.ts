@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         const imagekitResponse = await imagekit.upload({
             file: buffer,
             fileName: `${uuidv4()}-${file.name}`,
-            folder: `/droply/${userId}`,
+            folder: `/cloudify/${userId}`,
         });
 
         const newFile = await prisma.file.create({
