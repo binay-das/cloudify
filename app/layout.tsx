@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import Providers from "@/app/Providers";
 import { Footer } from "@/components/Footer";
+import { ImageKitProvider } from "@imagekit/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <Navbar />
-          {children}
-          <Footer />
-        </Providers>
+        <ImageKitProvider urlEndpoint={process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT!}>
+            <Providers>
+              {/* <Navbar /> */}
+              {children}
+              {/* <Footer /> */}
+            </Providers>
+        </ImageKitProvider>
       </body>
     </html>
   );
