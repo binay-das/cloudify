@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 
-export async function PATCH(
+export async function PUT(
     req: NextRequest,
     props: { params: Promise<{ fileId: string }> }
 ) {
