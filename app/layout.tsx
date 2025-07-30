@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import Providers from "@/app/Providers";
-import { Footer } from "@/components/Footer";
+import { Providers } from "@/components/providers";
 import { ImageKitProvider } from "@imagekit/next";
 
 const geistSans = Geist({
@@ -31,12 +29,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ImageKitProvider urlEndpoint={process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT!}>
-            <Providers>
-              {/* <Navbar /> */}
-              {children}
-              {/* <Footer /> */}
-            </Providers>
+        <ImageKitProvider
+          urlEndpoint={process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT!}
+        >
+          <Providers>{children}</Providers>
         </ImageKitProvider>
       </body>
     </html>
