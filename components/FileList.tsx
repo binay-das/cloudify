@@ -26,6 +26,7 @@ import {
   FolderPlus,
   Plus,
   Upload,
+  Image,
 } from "lucide-react";
 import FileUploadForm from "./FileUploadForm";
 
@@ -65,6 +66,10 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   const [folderName, setFolderName] = useState("");
   const [creatingFolder, setCreatingFolder] = useState(false);
 
+  const [imgDialogOpen, setImgDialogOpen] = useState<boolean>(false);
+  const [dialogImgUrl, setDialogImgUrl] = useState<string | null>(null);
+  const [dialogImgName, setDialogImgName] = useState<string | null>(null);
+
   useEffect(() => {
     setLoading(true);
     let url = `/api/files?userId=${userId}`;
@@ -83,6 +88,17 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   const enterFolder = (file: FileItem) => {
     setCurrentFolder(file.id);
     setFolderPath([...folderPath, { id: file.id, name: file.name }]);
+  };
+
+  const viewImage = (file: FileItem) => {
+    if (!file.path || !file.type?.startsWith("image/")) {
+      return;
+    }
+
+    const optimizedUrl = `${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`;
+    setDialogImgUrl(optimizedUrl);
+    setDialogImgName(file.name);
+    setImgDialogOpen(true);
   };
 
   const getFileIcon = (file: FileItem) => {
@@ -209,6 +225,8 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                 e.stopPropagation();
                 if (file.isFolder) {
                   enterFolder(file);
+                } else if (file.type?.startsWith("image/")) {
+                  viewImage(file)
                 }
               }}
             >
@@ -307,6 +325,33 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                   Create Folder
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={imgDialogOpen} onOpenChange={setImgDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-primary" />
+              <span>{dialogImgName}</span>
+            </DialogTitle>
+          </DialogHeader>
+          {dialogImgUrl && (
+            <img
+              src={dialogImgUrl}
+              alt={dialogImgName || "image"}
+              className="max-w-full max-h-[60vh] rounded shadow"
+              style={{ objectFit: "contain" }}
+            />
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setImgDialogOpen(false)}
+            >
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>
