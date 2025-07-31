@@ -221,7 +221,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
             <Card
               key={file.id}
               className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
-              onClick={(e) => {
+              onDoubleClick={(e) => {
                 e.stopPropagation();
                 if (file.isFolder) {
                   enterFolder(file);
