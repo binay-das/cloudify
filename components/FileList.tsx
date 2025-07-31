@@ -70,6 +70,8 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   const [dialogImgUrl, setDialogImgUrl] = useState<string | null>(null);
   const [dialogImgName, setDialogImgName] = useState<string | null>(null);
 
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     setLoading(true);
     let url = `/api/files?userId=${userId}`;
@@ -88,6 +90,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   const enterFolder = (file: FileItem) => {
     setCurrentFolder(file.id);
     setFolderPath([...folderPath, { id: file.id, name: file.name }]);
+    setSelectedFiles(new Set());
   };
 
   const viewImage = (file: FileItem) => {
@@ -101,10 +104,26 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     setImgDialogOpen(true);
   };
 
+  const goUp = () => {
+    if (!folderPath.length) {
+      return;
+    }
+
+    const newPath = [...folderPath];
+    newPath.pop();
+    setFolderPath(newPath);
+    setCurrentFolder(newPath.length ? newPath[newPath.length - 1].id : null);
+    setSelectedFiles(new Set());
+  };
+
   const getFileIcon = (file: FileItem) => {
-    if (file.isFolder) return <Folder className="h-8 w-8 text-blue-500" />;
-    if (file.type?.startsWith("image/"))
+    if (file.isFolder) {
+      return <Folder className="h-8 w-8 text-blue-500" />;
+    }
+    if (file.type?.startsWith("image/")) {
       return <ImageIcon className="h-8 w-8 text-green-500" />;
+    }
+
     return <File className="h-8 w-8 text-gray-500" />;
   };
 
@@ -161,6 +180,15 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goUp}
+            disabled={folderPath.length === 0}
+            className="h-6 px-2"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </Button>
           <span className="font-medium">Root</span>
           {folderPath.map((folder, idx) => (
             <div key={folder.id} className="flex items-center gap-2">
@@ -226,7 +254,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                 if (file.isFolder) {
                   enterFolder(file);
                 } else if (file.type?.startsWith("image/")) {
-                  viewImage(file)
+                  viewImage(file);
                 }
               }}
             >
@@ -347,10 +375,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
             />
           )}
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setImgDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setImgDialogOpen(false)}>
               Cancel
             </Button>
           </DialogFooter>
