@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/Badge";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       })
       .catch(() => setError("Could not load files"))
       .finally(() => setLoading(false));
-  }, [userId, currentFolder]);
+  }, [userId, currentFolder, refreshTrigger]);
 
   const enterFolder = (file: FileItem) => {
     setCurrentFolder(file.id);
@@ -134,6 +134,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     }
     setCreatingFolder(true);
     try {
+      console.log("Creating folder in:", currentFolder || "root");
       await axios.post("/api/folders", {
         name: folderName.trim(),
         userId: userId,
@@ -143,8 +144,8 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       toast.success(`Folder "${folderName}" has been created successfully.`);
       setFolderName("");
       setFolderModalOpen(false);
+      setRefreshTrigger((prev) => prev + 1);
       if (onCreateFolder) onCreateFolder();
-      window.location.reload();
     } catch (error) {
       toast.error("Folder Creation Failed");
     } finally {

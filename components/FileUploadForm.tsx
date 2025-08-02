@@ -4,15 +4,15 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import {
   Upload,
   X,
-  FileUp,
   AlertTriangle,
-  FolderPlus,
-  ArrowRight
+  ArrowRight,
+  Cloud,
+  FileText,
+  Image as ImageIcon
 } from "lucide-react";
 import axios from "axios";
 
@@ -31,12 +31,8 @@ export default function FileUploadForm({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [folderModalOpen, setFolderModalOpen] = useState(false);
-  const [folderName, setFolderName] = useState("");
-  const [creatingFolder, setCreatingFolder] = useState(false);
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -52,6 +48,7 @@ export default function FileUploadForm({
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.size > 5 * 1024 * 1024) {
@@ -65,6 +62,12 @@ export default function FileUploadForm({
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
   };
 
   const clearFile = () => {
@@ -82,6 +85,9 @@ export default function FileUploadForm({
     formData.append("userId", userId);
     if (currentFolder) {
       formData.append("parentId", currentFolder);
+      console.log("Uploading to folder:", currentFolder);
+    } else {
+      console.log("Uploading to root folder");
     }
     setUploading(true);
     setProgress(0);
@@ -98,89 +104,71 @@ export default function FileUploadForm({
           }
         },
       });
-      toast(`${file.name} has been uploaded successfully.`);
+      toast.success(`${file.name} has been uploaded successfully.`);
       clearFile();
       if (onUploadSuccess) onUploadSuccess();
     } catch (error) {
       setError("Failed to upload file. Please try again.");
-      toast("Upload Failed");
+      toast.error("Upload Failed");
     } finally {
       setUploading(false);
     }
   };
 
-  const handleCreateFolder = async () => {
-    if (!folderName.trim()) {
-      toast("Invalid Folder Name");
-      return;
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      return <ImageIcon className="h-8 w-8 text-green-500" />;
     }
-    setCreatingFolder(true);
-    try {
-      await axios.post("/api/folders/create", {
-        name: folderName.trim(),
-        userId: userId,
-        parentId: currentFolder,
-      });
+    return <FileText className="h-8 w-8 text-blue-500" />;
+  };
 
-      toast(`Folder "${folderName}" has been created successfully.`);
-      setFolderName("");
-      setFolderModalOpen(false);
-      if (onUploadSuccess) onUploadSuccess();
-    } catch (error) {
-      toast("Folder Creation Failed");
-    } finally {
-      setCreatingFolder(false);
-    }
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 mb-2">
-        <Button
-          variant="secondary"
-          className="flex-1 gap-2"
-          onClick={() => setFolderModalOpen(true)}
-        >
-          <FolderPlus className="h-4 w-4" />
-          New Folder
-        </Button>
-        <Button
-          variant="secondary"
-          className="flex-1 gap-2"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <FileUp className="h-4 w-4" />
-          Add Image
-        </Button>
-      </div>
-
+    <div className="space-y-6">
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors select-none cursor-pointer ${
+        onDragLeave={handleDragLeave}
+        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 select-none ${
           error
-            ? "border-destructive/30 bg-destructive/10"
+            ? "border-destructive/50 bg-destructive/5"
             : file
-            ? "border-primary/40 bg-primary/10"
-            : "border-muted-foreground/40 hover:border-primary/30"
+            ? "border-primary/50 bg-primary/5"
+            : isDragOver
+            ? "border-primary/70 bg-primary/10 scale-[1.02]"
+            : "border-muted-foreground/30 hover:border-primary/40 hover:bg-muted/30"
         }`}
       >
         {!file ? (
-          <div className="space-y-3">
-            <FileUp className="h-12 w-12 mx-auto text-primary/70" />
-            <div>
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className={`p-4 rounded-full transition-colors ${
+                isDragOver ? "bg-primary/20" : "bg-muted"
+              }`}>
+                <Cloud className="h-12 w-12 text-primary" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">
+                {isDragOver ? "Drop your file here" : "Upload your files"}
+              </h3>
               <p className="text-muted-foreground">
-                Drag and drop your image here, or{" "}
+                Drag and drop your files here, or{" "}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-primary underline font-medium inline bg-transparent border-0 p-0 m-0"
+                  className="text-primary underline font-medium hover:text-primary/80 transition-colors"
                 >
-                  browse
+                  browse files
                 </button>
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Images up to 5MB
+              <p className="text-xs text-muted-foreground">
+                Supports images up to 5MB
               </p>
             </div>
             <Input
@@ -192,22 +180,18 @@ export default function FileUploadForm({
             />
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-md">
-                  <FileUp className="h-5 w-5 text-primary" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  {getFileIcon(file)}
                 </div>
-                <div className="text-left space-y-0.5">
-                  <p className="text-sm font-medium truncate max-w-[180px]">
+                <div className="text-left space-y-1">
+                  <h3 className="font-semibold text-lg truncate max-w-[200px]" title={file.name}>
                     {file.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {file.size < 1024
-                      ? `${file.size} B`
-                      : file.size < 1024 * 1024
-                      ? `${(file.size / 1024).toFixed(1)} KB`
-                      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {formatFileSize(file.size)}
                   </p>
                 </div>
               </div>
@@ -215,75 +199,54 @@ export default function FileUploadForm({
                 variant="ghost"
                 size="icon"
                 onClick={clearFile}
-                className="text-muted-foreground"
+                className="text-muted-foreground hover:text-foreground"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
 
             {error && (
-              <div className="bg-destructive/10 text-destructive p-3 rounded-lg flex items-center gap-2 text-sm">
-                <AlertTriangle className="h-4 w-4" />
-                {error}
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-lg flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+                <div className="text-left">
+                  <p className="font-medium">Upload Error</p>
+                  <p className="text-sm">{error}</p>
+                </div>
               </div>
             )}
 
             {uploading && (
-              <Progress value={progress} className="h-2" aria-valuenow={progress} />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Uploading...</span>
+                  <span>{progress}%</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </div>
             )}
 
             <Button
               variant="default"
-              className="w-full gap-2"
+              className="w-full gap-2 h-12"
               onClick={handleUpload}
               disabled={!!error || uploading}
             >
-              <Upload className="h-4 w-4" />
-              {uploading ? `Uploading... ${progress}%` : "Upload Image"}
-              {!uploading && <ArrowRight className="h-4 w-4" />}
+              {uploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Uploading... {progress}%
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  Upload File
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         )}
       </div>
-
-      <Dialog open={folderModalOpen} onOpenChange={setFolderModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FolderPlus className="h-5 w-5 text-primary" />
-              <span>New Folder</span>
-            </DialogTitle>
-            <DialogDescription>
-              Enter a name for your folder:
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2">
-            <Input
-              type="text"
-              placeholder="My Images"
-              value={folderName}
-              onChange={e => setFolderName(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setFolderModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateFolder}
-              disabled={!folderName.trim() || creatingFolder}
-              className="gap-2"
-            >
-              {creatingFolder ? "Creating..." : "Create"}
-              {!creatingFolder && <ArrowRight className="h-4 w-4" />}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
