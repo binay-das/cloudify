@@ -245,62 +245,72 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {files.map((file) => (
-            <Card
-              key={file.id}
-              className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                if (file.isFolder) {
-                  enterFolder(file);
-                } else if (file.type?.startsWith("image/")) {
-                  viewImage(file);
-                }
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-shrink-0">{getFileIcon(file)}</div>
-                    <div className="flex-1 min-w-0">
-                      <h3
-                        className="font-medium text-sm truncate"
-                        title={file.name}
-                      >
-                        {file.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        {file.isFolder ? (
-                          <Badge
-                            color="secondary"
-                            variant="flat"
-                            className="text-xs"
-                          >
-                            Folder
-                          </Badge>
-                        ) : (
-                          <>
-                            {file.type && (
-                              <Badge
-                                color="default"
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {file.type.split("/")[1]?.toUpperCase() ||
-                                  "FILE"}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+        <>
+          {(() => {
+            const sortedFolders = files.filter((file) => file.isFolder);
+            const sortedFiles = files.filter((file) => !file.isFolder);
+
+            return (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {sortedFolders.map((file) => (
+                    <Card
+                      key={file.id}
+                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] py-2 rounded-lg"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        enterFolder(file);
+                      }}
+                    >
+                      <CardContent className="flex gap-2 items-center">
+                        <Folder className="h-5 w-5" />
+                        <h3 className="font-medium text-s truncate">
+                          {file.name}
+                        </h3>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {sortedFiles.map((file) => (
+                    <Card
+                      key={file.id}
+                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        if (file.type?.startsWith("image/")) {
+                          viewImage(file);
+                        }
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0">
+                            {getFileIcon(file)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-sm truncate">
+                              {file.name}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                              {file.type && (
+                                <Badge variant="outline" className="text-xs">
+                                  {file.type.split("/")[1]?.toUpperCase() ||
+                                    "FILE"}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       <Dialog open={folderModalOpen} onOpenChange={setFolderModalOpen}>
