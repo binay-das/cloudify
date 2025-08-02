@@ -256,15 +256,15 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                   {sortedFolders.map((file) => (
                     <Card
                       key={file.id}
-                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] py-2 rounded-lg"
+                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] py-2 rounded-lg bg-gray-200"
                       onDoubleClick={(e) => {
                         e.stopPropagation();
                         enterFolder(file);
                       }}
                     >
                       <CardContent className="flex gap-2 items-center">
-                        <Folder className="h-5 w-5" />
-                        <h3 className="font-medium text-s truncate">
+                        <Folder className="h-5 w-5 flex-shrink-0" />
+                        <h3 className="font-medium text-sm truncate flex-grow">
                           {file.name}
                         </h3>
                       </CardContent>
@@ -276,7 +276,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                   {sortedFiles.map((file) => (
                     <Card
                       key={file.id}
-                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
+                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] p-2 rounded-lg bg-gray-200"
                       onDoubleClick={(e) => {
                         e.stopPropagation();
                         if (file.type?.startsWith("image/")) {
@@ -284,24 +284,31 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                         }
                       }}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-shrink-0">
-                            {getFileIcon(file)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm truncate">
+                      <CardContent className="p-0 flex flex-col gap-2">
+                        <div className="flex items-center justify-between pl-2">
+                          <div className="flex items-center gap-2 flex-grow min-w-0">
+                            <ImageIcon className="h-5 w-5 flex-shrink-0" />
+                            <h3 className="font-medium text-sm truncate flex-grow">
                               {file.name}
                             </h3>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                              {file.type && (
-                                <Badge variant="outline" className="text-xs">
-                                  {file.type.split("/")[1]?.toUpperCase() ||
-                                    "FILE"}
-                                </Badge>
-                              )}
-                            </div>
                           </div>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-shrink-0">
+                            {file.type && (
+                              <Badge className="text-xs bg-gray-500">
+                                {file.type.split("/")[1]?.toUpperCase() ||
+                                  "FILE"}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`}
+                            alt={file.name}
+                            className="w-full h-full object-cover"
+                            style={{ objectFit: "contain" }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
