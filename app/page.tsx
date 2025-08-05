@@ -1,6 +1,24 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Cloud,
+  Upload,
+  Shield,
+  Zap,
+  ArrowRight,
+  CheckCircle,
+  FolderOpen,
+  Play,
+  Lock,
+  Globe,
+  Smartphone,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,251 +27,259 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ArrowRight,
-  FileCheck,
-  Fingerprint,
-  FolderSearch,
-  Globe,
-  History,
-  Lock,
-  Notebook,
-  Quote,
-  Share2,
-  Shield,
-  Smartphone,
-  Upload,
-  Zap,
-} from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
-const features = [
-  {
-    title: "Secure Storage",
-    description:
-      "End-to-end encryption keeps your files completely private and secure.",
-    icon: <Lock />,
-    color: "text-chart-1",
-  },
-  {
-    title: "Access Anywhere",
-    description:
-      "Seamlessly access your files from any device, anywhere in the world.",
-    icon: <Smartphone />,
-    color: "text-chart-2",
-  },
-  {
-    title: "Version History",
-    description:
-      "Track changes and restore previous versions of your files with ease.",
-    icon: <History />,
-    color: "text-chart-3",
-  },
-  {
-    title: "Smart Search",
-    description:
-      "Find any file instantly with our powerful search capabilities.",
-    icon: <FolderSearch />,
-    color: "text-chart-4",
-  },
-  {
-    title: "Easy Sharing",
-    description:
-      "Share files and folders with anyone through secure links and permissions.",
-    icon: <Share2 />,
-    color: "text-chart-5",
-  },
-  {
-    title: "Lightning Fast",
-    description:
-      "Experience rapid uploads and downloads with our optimized infrastructure.",
-    icon: <Zap />,
-    color: "text-chart-1",
-  },
-  {
-    title: "File Recovery",
-    description:
-      "Never lose important data with automatic backup and recovery options.",
-    icon: <FileCheck />,
-    color: "text-chart-2",
-  },
-  {
-    title: "Advanced Security",
-    description:
-      "Multi-factor authentication and breach detection keep your account safe.",
-    icon: <Fingerprint />,
-    color: "text-chart-4",
-  },
-];
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4 },
+};
 
-const testimonials = [
-  {
-    content:
-      "Cloudify has completely transformed how our team collaborates. The intuitive interface and powerful sharing features have made our workflow so much smoother.",
-    author: "Sarah Johnson",
-    role: "Creative Director, DesignHub",
-    avatar:
-      "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=100",
-    initials: "SJ",
-  },
-  {
-    content:
-      "The security features in Cloudify give me peace of mind when handling sensitive client documents. It&#39;s reliable, fast, and incredibly easy to use.",
-    author: "Michael Chen",
-    role: "Financial Advisor, WealthWise",
-    avatar:
-      "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100",
-    initials: "MC",
-  },
-  {
-    content:
-      "As someone who works across multiple devices, Cloudifys seamless sync is a game-changer. I can start work on my laptop and continue on my phone without missing a beat.",
-    author: "Emily Rodriguez",
-    role: "Remote Project Manager",
-    avatar:
-      "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100",
-    initials: "ER",
-  },
-  {
-    content:
-      "Weve tried many storage solutions, but Cloudify stands out with its balance of powerful features and user-friendly design. Our entire team adopted it within days.",
-    author: "Thomas Wright",
-    role: "CTO, TechStart",
-    avatar:
-      "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100",
-    initials: "TW",
-  },
-];
+const slideIn = {
+  initial: { opacity: 0, x: -20 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.5 },
+};
 
-export default function Home() {
+export default function LandingPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (status === "authenticated") {
+      // router.push("/files");
+    }
+  }, [status, router]);
+
+  if (!mounted) {
+    return null;
+  }
+
+  const features = [
+    {
+      icon: <Upload className="h-5 w-5" />,
+      title: "Quick Upload",
+      description: "Drop files anywhere or click to browse",
+      accent: "border-l-blue-400",
+    },
+    {
+      icon: <FolderOpen className="h-5 w-5" />,
+      title: "Smart Organization",
+      description: "Create folders and organize with ease",
+      accent: "border-l-green-400",
+    },
+    {
+      icon: <Shield className="h-5 w-5" />,
+      title: "Your Data, Secured",
+      description: "Secured data, for peace of mind",
+      accent: "border-l-purple-400",
+    },
+    {
+      icon: <Globe className="h-5 w-5" />,
+      title: "Access Anywhere",
+      description: "Available on web, mobile, and desktop",
+      accent: "border-l-orange-400",
+    },
+  ];
+
   return (
-    <div>
-      <section className="flex lg:flex-row flex-col justify-center items-center gap-12 pt-24 sm:pt-32 min-h-screen px-8">
-        <div className="flex flex-col gap-8 max-w-xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            Your files, secure, structured and accessible everywhere.
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Cloudify helps you store, share, and collaborate on files with
-            unmatched security and simplicity. Access your content from any
-            device, anywhere in the world.
-          </p>
+    <div className="min-h-screen bg-white dark:bg-slate-950">
+      <Navbar />
 
-          <div className="flex gap-4">
-            <Button size={"lg"} className="">
-              Start for free
-              <ArrowRight />
-            </Button>
-            <Button size={"lg"} variant={"secondary"} className="">
-              Read docs
-              <Notebook />
-            </Button>
-          </div>
+      <section className="pt-16 pb-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-center space-y-6"
+          >
+            <div className="inline-block">
+              <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:bg-blue-950">
+                Cloudify
+              </Badge>
+            </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-chart-2" />
-              <span>End-to-end encryption</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Upload className="h-5 w-5 text-chart-1" />
-              <span>Up to 2GB free storage</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-chart-4" />
-              <span>Access anywhere</span>
-            </div>
-          </div>
-        </div>
+            <h1 className="text-4xl md:text-5xl font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+              A place for your files.
+              <br />
+              <span className="text-blue-500">Nothing more, nothing less.</span>
+            </h1>
 
-        <div className="flex flex-col max-w-xl">
-          <Image
-            alt="img"
-            src={
-              "https://static.vecteezy.com/system/resources/previews/029/455/013/non_2x/businesswoman-using-laptop-computer-upload-file-and-download-information-data-on-cloud-computing-technology-network-work-from-home-concept-illustration-vector.jpg"
-            }
-            width={500}
-            height={500}
-          />
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+              Upload your files, organize them in folders, and access them from
+              anywhere. That's it. No complex features, no overwhelming
+              interface.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Link href="/signin">
+                <Button className="bg-blue-500 hover:bg-blue-600 px-6 py-2">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                className="px-6 py-2 border-gray-200 dark:border-gray-700"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                See How It Works
+              </Button>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-16"
+          >
+            <div className="bg-gray-50 dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                <div className="ml-4 bg-white dark:bg-slate-800 rounded px-3 py-1 text-xs text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                  app.cloudify.com
+                </div>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-gray-700 h-48 flex items-center justify-center">
+                <div className="text-center">
+                  <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Your files will appear here
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="py-20 mx-auto px-4 bg-muted/30 border">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Everything that you need
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Cloudify combines powerful features with an intuitive interface,
-            making file management simpler than ever before.
-          </p>
-        </div>
+      <section className="py-16 bg-gray-50/50 dark:bg-slate-900/50">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Built for simplicity
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+              We focus on what matters most: making file storage straightforward
+              and reliable.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {features.map((feature) => (
-            <Card
-              key={feature.title}
-              className="h-full transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
-            >
-              <CardHeader className="flex items-center gap-4">
-                <div
-                  className={`${feature.color} p-2 rounded-md inline-flex bg-muted`}
+          <div className="grid md:grid-cols-2 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card
+                  className={`border-0 border-l-4 ${feature.accent} shadow-none bg-white dark:bg-slate-900 rounded-none rounded-r-lg hover:shadow-sm transition-shadow`}
                 >
-                  {feature.icon}
-                </div>
-                <CardTitle>{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-foreground/80">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-gray-100 dark:bg-slate-800 rounded">
+                        {feature.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                          {feature.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {feature.description}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 mx-auto bg-muted/30">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Trusted by thousands
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Here's what our customers have to say about their experience with
-            Cloudify.
-          </p>
-        </div>
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Why we built this
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                Most cloud storage services are bloated with features you don't
+                need. We believe file storage should be simple, fast, and
+                reliable.
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                Upload your files, organize them however you want, and access
+                them from any device. That's what Cloudify does best.
+              </p>
+            </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {testimonials.map((testimonial, idx) => (
-            <Card key={testimonial.author} className="h-full">
-              <CardContent className="pt-6 flex flex-col h-full">
-                <Quote className="h-8 w-8 text-primary/40 mb-4" />
-
-                <p className="text-lg mb-6 flex-grow">
-                  "{testimonial.content}"
-                </p>
-                <div className="flex items-center">
-                  <Avatar className="h-12 w-12 mr-4">
-                    <AvatarImage
-                      src={testimonial.avatar}
-                      alt={testimonial.author}
-                    />
-                    <AvatarFallback>{testimonial.initials}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{testimonial.author}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {testimonial.role}
-                    </p>
-                  </div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="space-y-3"
+            >
+              {[
+                "No unnecessary features",
+                "Clean, minimal interface",
+                "Fast uploads and downloads",
+                "Works on any device",
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              ))}
+            </motion.div>
+          </div>
         </div>
       </section>
+
+      <section className="py-16 bg-blue-50 dark:bg-blue-950/20">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Ready to try it out?
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">
+              Create your account and start uploading files in under a minute.
+            </p>
+            <Link href="/signup">
+              <Button className="bg-blue-500 hover:bg-blue-600 px-6 py-2">
+                Create Account
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
