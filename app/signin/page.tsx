@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Cloud,
   Mail,
   Lock,
   ArrowRight,
@@ -24,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/layout/Navbar";
 
 const fadeInUp = {
@@ -117,15 +115,14 @@ export default function SignInPage() {
         >
           <motion.div variants={fadeInUp}>
             <Card className="backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 border border-gray-200/50 dark:border-gray-700/50 shadow-2xl rounded-3xl overflow-hidden">
-                <CardHeader className="p-0 text-center">
-                  <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Sign in to your account
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-300 mt-2">
-                    Enter your credentials to access your files
-                  </CardDescription>
-                </CardHeader>
-              
+              <CardHeader className="p-0 text-center">
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Sign in to your account
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-300 mt-2">
+                  Enter your credentials to access your files
+                </CardDescription>
+              </CardHeader>
 
               <CardContent className="p-6 space-y-6">
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -191,12 +188,9 @@ export default function SignInPage() {
                   )}
 
                   <div className="text-right">
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                    >
+                    <p className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer">
                       Forgot your password?
-                    </Link>
+                    </p>
                   </div>
 
                   <Button
