@@ -27,11 +27,14 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const getUserInitials = (name: any) => {
-    if (!name) return "U";
+  const getUserInitials = (name: string | null) => {
+    if (!name || name.trim() === "" || name === null) {
+      return "U";
+    }
+
     return name
       .split(" ")
-      .map((n: any) => n[0])
+      .map((n: string) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);

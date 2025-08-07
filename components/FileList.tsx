@@ -29,7 +29,6 @@ import {
   FolderPlus,
   Plus,
   Upload,
-  Image,
   Home,
   Trash,
   Star,
@@ -39,7 +38,6 @@ import {
   Search,
   Grid3X3,
   List,
-  SortAsc,
   MoreVertical,
   Eye,
   Info,
@@ -55,7 +53,6 @@ import FileUploadForm from "./FileUploadForm";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
@@ -68,6 +65,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface FileListProps {
   userId: string;
@@ -172,6 +170,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       setFolderModalOpen(false);
       if (onCreateFolder) onCreateFolder();
     } catch (error) {
+      console.log(error);
       toast.error("Folder Creation Failed");
     } finally {
       setCreatingFolder(false);
@@ -189,6 +188,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       await axios.delete(`/api/files/${file.id}/delete`);
       toast.success(`'${file.name}' deleted successfully.`);
     } catch (error) {
+      console.log(error);
       toast.error(`Failed to delete '${file.name}'.`);
     }
   };
@@ -198,6 +198,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       await axios.put(`/api/files/${file.id}/trash`);
       toast.success(`'${file.name}' moved to trash.`);
     } catch (error) {
+      console.log(error);
       toast.error(`Failed to move '${file.name}' to trash.`);
     }
   };
@@ -209,6 +210,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
         `'${file.name}' ${file.isFav ? "removed from favorites" : "starred"}.`
       );
     } catch (error) {
+      console.log(error);
       toast.error(`Failed to update star for '${file.name}'.`);
     }
   };
@@ -232,6 +234,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       await axios.put(`/api/files/${file.id}/trash`);
       toast.success(`'${file.name}' recovered.`);
     } catch (error) {
+      console.log(error);
       toast.error(`Failed to recover '${file.name}'.`);
     }
   };
@@ -243,6 +246,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       );
       toast.success("All files recovered from trash.");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to recover all files.");
     }
   };
@@ -258,6 +262,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       await axios.delete("/api/files/empty-trash");
       toast.success("Trash emptied successfully.");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to empty trash.");
     }
   };
@@ -391,7 +396,11 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
             >
               <Button
                 variant={activeTab === key ? "default" : "ghost"}
-                onClick={() => setActiveTab(key as any)}
+                onClick={() => {
+                  if (key === "all" || key === "starred" || key === "trash") {
+                    setActiveTab(key);
+                  }
+                }}
                 className={`justify-start gap-2 w-full h-9 rounded-lg transition-all duration-200 text-sm ${
                   activeTab === key
                     ? `bg-gradient-to-r ${gradient} text-white shadow-md hover:shadow-lg`
@@ -1008,7 +1017,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                                       {file.type?.startsWith("image/") &&
                                       file.path ? (
                                         <>
-                                          <img
+                                          <Image
                                             src={`${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`}
                                             alt={file.name}
                                             className="w-full h-full object-cover"
@@ -1220,7 +1229,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                                       {file.type?.startsWith("image/") &&
                                       file.path ? (
                                         <div className="w-10 h-10 rounded-lg overflow-hidden">
-                                          <img
+                                          <Image
                                             src={`${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`}
                                             alt={file.name}
                                             className="w-full h-full object-cover"
@@ -1438,7 +1447,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3 text-lg">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
-                  <Image className="h-4 w-4 text-white" />
+                  <ImageIcon className="h-4 w-4 text-white" />
                 </div>
                 {dialogImgName}
               </DialogTitle>
@@ -1446,7 +1455,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
             {dialogImgUrl && (
               <div className="py-4">
                 <ScrollArea className="max-h-[70vh]">
-                  <img
+                  <Image
                     src={dialogImgUrl}
                     alt={dialogImgName || "image"}
                     className="max-w-full h-auto rounded-xl shadow-lg mx-auto"

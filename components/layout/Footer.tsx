@@ -47,7 +47,8 @@ export default function Footer() {
       setEmail("");
       setTimeout(() => setIsSubscribed(false), 3000);
     } catch (err) {
-      alert("Something went wrong");
+      console.log(err);
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }

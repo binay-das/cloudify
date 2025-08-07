@@ -17,7 +17,7 @@ const Contact = () => {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-6">
-            I'm always open to connecting with fellow developers and creators.
+            I&apos;m always open to connecting with fellow developers and creators.
           </p>
           <Button asChild className="w-full mb-8">
             <a
@@ -33,7 +33,7 @@ const Contact = () => {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Or, drop me an email</h3>
             <p className="text-muted-foreground">
-              Whether you have a question or just want to say hi, I'll try my
+              Whether you have a question or just want to say hi, I&apos;ll try my
               best to get back to you!
             </p>
             <div className="flex items-center justify-center rounded-lg border border-border bg-muted/30 dark:bg-white/5 p-3">

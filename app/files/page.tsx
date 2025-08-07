@@ -1,36 +1,29 @@
 "use client";
 
-import { FileUp, Sparkles, Shield, Zap } from "lucide-react";
+import { Sparkles} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import FileList from "@/components/FileList";
-import Sidebar from "@/components/layout/Sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+// import Sidebar from "@/components/layout/Sidebar";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  // const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  // const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
-  const handleFileUploadSuccess = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-    setUploadDialogOpen(false);
-  }, []);
+  // const handleFileUploadSuccess = useCallback(() => {
+  //   setRefreshTrigger((prev) => prev + 1);
+  //   setUploadDialogOpen(false);
+  // }, []);
 
-  const handleFolderCreation = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-  }, []);
+  // const handleFolderCreation = useCallback(() => {
+  //   setRefreshTrigger((prev) => prev + 1);
+  // }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -95,7 +88,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50/50 via-white to-gray-100/50 dark:from-gray-950/50 dark:via-gray-900 dark:to-gray-950/50">
       <main className="flex-1 overflow-auto relative">
-        <section className="relative z-10 p-8 space-y-8">
+        <section className="relative z-10 p-4 space-y-8">
           <Card className="border-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader>
               <div className="flex items-center gap-4">
@@ -107,7 +100,7 @@ export default function Dashboard() {
                     Welcome back, {name?.split(" ")[0]}!
                   </CardTitle>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Manage your files and folders with ease and security{" "}
+                    Manage your files and folders with ease and security
                   </p>
                 </div>
               </div>
@@ -115,7 +108,7 @@ export default function Dashboard() {
             <CardContent>
               <FileList
                 userId={userId as string}
-                onCreateFolder={handleFolderCreation}
+                // onCreateFolder={handleFolderCreation}
               />
             </CardContent>
           </Card>

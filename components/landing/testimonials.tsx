@@ -53,7 +53,7 @@ export function Testimonials() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by thousands</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Here's what our customers have to say about their experience with Cloudify.
+            Here&apos;s what our customers have to say about their experience with Cloudify.
           </p>
         </div>
         
@@ -69,7 +69,7 @@ export function Testimonials() {
               <Card className="h-full">
                 <CardContent className="pt-6 flex flex-col h-full">
                   <Quote className="h-8 w-8 text-primary/40 mb-4" />
-                  <p className="text-lg mb-6 flex-grow">"{testimonial.content}"</p>
+                  <p className="text-lg mb-6 flex-grow">&ldquo;{testimonial.content}&ldquo;</p>
                   <div className="flex items-center">
                     <Avatar className="h-12 w-12 mr-4">
                       <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
@@ -98,7 +98,7 @@ export function Testimonials() {
                   <Card className="mx-4">
                     <CardContent className="pt-6">
                       <Quote className="h-8 w-8 text-primary/40 mb-4" />
-                      <p className="text-lg mb-6">"{testimonial.content}"</p>
+                      <p className="text-lg mb-6">&ldquo;{testimonial.content}&ldquo;</p>
                       <div className="flex items-center">
                         <Avatar className="h-12 w-12 mr-4">
                           <AvatarImage src={testimonial.avatar} alt={testimonial.author} />

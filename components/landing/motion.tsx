@@ -43,7 +43,6 @@ export const motion = {
       const [isAnimated, setIsAnimated] = React.useState(false);
       
       React.useEffect(() => {
-        // Start animation after component mount
         const timer = setTimeout(() => setIsAnimated(true), 10);
         return () => clearTimeout(timer);
       }, []);
@@ -151,3 +150,9 @@ export const motion = {
     }
   ),
 };
+
+
+// for linting
+motion.div.displayName = "MotionDiv";
+motion.h1.displayName = "MotionH1";
+motion.p.displayName = "MotionP";

@@ -5,19 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Cloud,
   Mail,
   Lock,
   User,
   ArrowRight,
   Eye,
   EyeOff,
-  CheckCircle,
   Sparkles,
   Shield,
-  Zap,
-  Users,
-  Globe,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -102,6 +97,7 @@ export default function SignUpPage() {
 
       router.push("/signin");
     } catch (err) {
+      console.log(err);
       setError("Network error. Please try again.");
       setLoading(false);
     }

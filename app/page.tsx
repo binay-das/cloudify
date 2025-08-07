@@ -1,64 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Cloud,
   Upload,
   Shield,
-  Zap,
   ArrowRight,
   CheckCircle,
   FolderOpen,
   Play,
-  Lock,
-  Globe,
-  Smartphone,
+  Globe
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4 },
-};
-
-const slideIn = {
-  initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.5 },
-};
-
 export default function LandingPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    if (status === "authenticated") {
-      // router.push("/files");
-    }
-  }, [status, router]);
-
-  if (!mounted) {
-    return null;
-  }
-
   const features = [
     {
       icon: <Upload className="h-5 w-5" />,
@@ -112,7 +75,7 @@ export default function LandingPage() {
 
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
               Upload your files, organize them in folders, and access them from
-              anywhere. That's it. No complex features, no overwhelming
+              anywhere. That&apos;s it. No complex features, no overwhelming
               interface.
             </p>
 
@@ -220,13 +183,13 @@ export default function LandingPage() {
                 Why we built this
               </h3>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                Most cloud storage services are bloated with features you don't
+                Most cloud storage services are bloated with features you don&apos;t
                 need. We believe file storage should be simple, fast, and
                 reliable.
               </p>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 Upload your files, organize them however you want, and access
-                them from any device. That's what Cloudify does best.
+                them from any device. That&apos;s what Cloudify does best.
               </p>
             </motion.div>
 

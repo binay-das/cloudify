@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
     const queryUserId = searchParams.get("userId");
     const parentId = searchParams.get("parentId");
 
-    console.log("searchParamss",searchParams);
-    console.log("queryUserId",queryUserId);
+    // console.log("searchParamss",searchParams);
+    // console.log("queryUserId",queryUserId);
 
     if (!queryUserId || queryUserId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

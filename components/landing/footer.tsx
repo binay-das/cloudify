@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Cloud, Mail, Twitter, Facebook, Instagram, Linkedin, Github } from 'lucide-react';
+import { Cloud, Twitter, Facebook, Instagram, Linkedin, Github } from 'lucide-react';
 
 const footerLinks = [
   {

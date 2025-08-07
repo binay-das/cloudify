@@ -108,6 +108,7 @@ export default function FileUploadForm({
       clearFile();
       if (onUploadSuccess) onUploadSuccess();
     } catch (error) {
+      console.log(error);
       setError("Failed to upload file. Please try again.");
       toast.error("Upload Failed");
     } finally {
