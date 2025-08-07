@@ -31,6 +31,8 @@ import {
   Trash,
   Star,
   StarOff,
+  Download,
+  RotateCcw,
 } from "lucide-react";
 import FileUploadForm from "./FileUploadForm";
 
@@ -77,6 +79,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   const [dialogImgName, setDialogImgName] = useState<string | null>(null);
 
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'all' | 'starred' | 'trash'>('all');
 
   useEffect(() => {
     setLoading(true);
@@ -178,6 +181,49 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     }
   };
 
+  const handleDownload = (file: FileItem) => {
+    if (!file.path) {
+      toast.error("No file path available for download.");
+      return;
+    }
+    const url = `${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleRecover = async (file: FileItem) => {
+    try {
+      await axios.put(`/api/files/${file.id}/trash`);
+      toast.success(`'${file.name}' recovered.`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error(`Failed to recover '${file.name}'.`);
+    }
+  };
+  const handleRecoverAll = async () => {
+    try {
+      await Promise.all(filteredFiles.map((file) => axios.put(`/api/files/${file.id}/trash`)));
+      toast.success('All files recovered from trash.');
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error('Failed to recover all files.');
+    }
+  };
+  const handleEmptyTrash = async () => {
+    if (!window.confirm('Are you sure you want to permanently delete all trashed files? This action cannot be undone.')) return;
+    try {
+      await axios.delete('/api/files/empty-trash');
+      toast.success('Trash emptied successfully.');
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error('Failed to empty trash.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -212,6 +258,13 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       </div>
     );
   }
+
+  const filteredFiles = files.filter((file) => {
+    if (activeTab === 'all') return !file.isTrash;
+    if (activeTab === 'starred') return file.isFav && !file.isTrash;
+    if (activeTab === 'trash') return file.isTrash;
+    return true;
+  });
 
   return (
     <div className="space-y-8">
@@ -278,7 +331,43 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
         </div>
       </div>
 
-      {files.length === 0 ? (
+      {/* Tab UI */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={activeTab === 'all' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('all')}
+          className="flex items-center gap-2"
+        >
+          <FolderOpen className="h-4 w-4" /> All Files
+        </Button>
+        <Button
+          variant={activeTab === 'starred' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('starred')}
+          className="flex items-center gap-2"
+        >
+          <Star className="h-4 w-4" /> Starred
+        </Button>
+        <Button
+          variant={activeTab === 'trash' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('trash')}
+          className="flex items-center gap-2"
+        >
+          <Trash className="h-4 w-4" /> Trash
+        </Button>
+      </div>
+
+      {activeTab === 'trash' && filteredFiles.length > 0 && (
+        <div className="flex gap-2 mb-4">
+          <Button variant="destructive" onClick={handleEmptyTrash} className="flex items-center gap-2">
+            <Trash className="h-4 w-4" /> Empty Trash
+          </Button>
+          <Button variant="outline" onClick={handleRecoverAll} className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" /> Recover All
+          </Button>
+        </div>
+      )}
+
+      {filteredFiles.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-center p-8 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200/50 dark:border-gray-700/50">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 mb-6">
             <FolderOpen className="h-16 w-16 text-blue-500" />
@@ -294,8 +383,8 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       ) : (
         <div className="space-y-8">
           {(() => {
-            const sortedFolders = files.filter((file) => file.isFolder);
-            const sortedFiles = files.filter((file) => !file.isFolder);
+            const sortedFolders = filteredFiles.filter((file) => file.isFolder);
+            const sortedFiles = filteredFiles.filter((file) => !file.isFolder);
 
             return (
               <>
@@ -348,6 +437,20 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                             >
                               <Trash className="h-4 w-4" />
                             </Button>
+                            {activeTab === 'trash' && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-green-500 hover:bg-green-100 dark:hover:bg-green-900 rounded-full ml-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRecover(file);
+                                }}
+                                aria-label={`Recover ${file.isFolder ? "folder" : "file"} ${file.name}`}
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            )}
                           </CardContent>
                         </Card>
                       ))}
@@ -403,6 +506,19 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  className="text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-full ml-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownload(file);
+                                  }}
+                                  aria-label={`Download file ${file.name}`}
+                                  disabled={file.isTrash}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   className={`text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded-full ml-2 ${file.isFav ? "" : "opacity-60"}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -421,11 +537,25 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                                     e.stopPropagation();
                                     handleTrash(file);
                                   }}
-                                  aria-label={`Move ${file.isFolder ? "folder" : "file"} ${file.name} to trash`}
+                                  aria-label={`Move file ${file.name} to trash`}
                                   disabled={file.isTrash}
                                 >
                                   <Trash className="h-4 w-4" />
                                 </Button>
+                                {activeTab === 'trash' && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-green-500 hover:bg-green-100 dark:hover:bg-green-900 rounded-full ml-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRecover(file);
+                                    }}
+                                    aria-label={`Recover ${file.isFolder ? "folder" : "file"} ${file.name}`}
+                                  >
+                                    <RotateCcw className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </CardContent>
