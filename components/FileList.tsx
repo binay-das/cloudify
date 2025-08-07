@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -27,6 +27,10 @@ import {
   Plus,
   Upload,
   Image,
+  Home,
+  Trash,
+  Star,
+  StarOff,
 } from "lucide-react";
 import FileUploadForm from "./FileUploadForm";
 
@@ -43,6 +47,8 @@ interface FileItem {
   createdAt?: string;
   isFolder: boolean;
   path?: string;
+  isFav?: boolean;
+  isTrash?: boolean;
 }
 
 export default function FileList({ userId, onCreateFolder }: FileListProps) {
@@ -116,17 +122,6 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     setSelectedFiles(new Set());
   };
 
-  const getFileIcon = (file: FileItem) => {
-    if (file.isFolder) {
-      return <Folder className="h-8 w-8 text-blue-500" />;
-    }
-    if (file.type?.startsWith("image/")) {
-      return <ImageIcon className="h-8 w-8 text-green-500" />;
-    }
-
-    return <File className="h-8 w-8 text-gray-500" />;
-  };
-
   const handleCreateFolder = async () => {
     if (!folderName.trim()) {
       toast.error("Please enter a folder name");
@@ -153,12 +148,47 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
     }
   };
 
+  const handleDelete = async (file: FileItem) => {
+    if (!window.confirm(`Are you sure you want to delete '${file.name}'? This action cannot be undone.`)) return;
+    try {
+      await axios.delete(`/api/files/${file.id}/delete`);
+      toast.success(`'${file.name}' deleted successfully.`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error(`Failed to delete '${file.name}'.`);
+    }
+  };
+
+  const handleTrash = async (file: FileItem) => {
+    try {
+      await axios.put(`/api/files/${file.id}/trash`);
+      toast.success(`'${file.name}' moved to trash.`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error(`Failed to move '${file.name}' to trash.`);
+    }
+  };
+  const handleStar = async (file: FileItem) => {
+    try {
+      await axios.put(`/api/files/${file.id}/star`);
+      toast.success(`'${file.name}' ${file.isFav ? "removed from favorites" : "starred"}.`);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      toast.error(`Failed to update star for '${file.name}'.`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Loading files...</p>
+        <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/40 dark:border-gray-700/40">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-transparent border-t-blue-500 border-r-purple-500"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 animate-pulse"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">
+            Loading your files...
+          </p>
         </div>
       </div>
     );
@@ -167,9 +197,15 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-destructive mb-2">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
+        <div className="text-center p-8 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <p className="text-red-600 dark:text-red-400 mb-4 font-medium">
+            {error}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="border-red-300 text-red-600 hover:bg-red-50"
+          >
             Try Again
           </Button>
         </div>
@@ -178,43 +214,51 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-xl p-2 border border-gray-200/40 dark:border-gray-700/40 shadow-sm">
           <Button
             variant="ghost"
             size="sm"
             onClick={goUp}
             disabled={folderPath.length === 0}
-            className="h-6 px-2"
+            className="h-8 px-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg"
           >
             <ArrowUp className="h-4 w-4" />
+            Up
           </Button>
-          <span className="font-medium">Root</span>
-          {folderPath.map((folder, idx) => (
-            <div key={folder.id} className="flex items-center gap-2">
-              <ChevronRight className="h-4 w-4" />
-              <span className="font-medium">{folder.name}</span>
-            </div>
-          ))}
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Home className="h-4 w-4 text-blue-500" />
+            <span className="text-gray-900 dark:text-white">Root</span>
+            {folderPath.map((folder, idx) => (
+              <div key={folder.id} className="flex items-center gap-2">
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-700 dark:text-gray-300">
+                  {folder.name}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Upload className="h-5 w-5 mr-2" />
-                New File
+              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                <Upload className="h-4 w-4" />
+                Upload Files
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl rounded-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Upload className="h-5 w-5 text-primary" />
+                <DialogTitle className="flex items-center gap-3 text-xl">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                    <Upload className="h-5 w-5 text-white" />
+                  </div>
                   Upload Files
                 </DialogTitle>
               </DialogHeader>
-              <div className="py-4">
+              <div className="py-6">
                 <FileUploadForm
                   userId={userId as string}
                   onUploadSuccess={handleFileUploadSuccess}
@@ -225,9 +269,8 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
           </Dialog>
           <Button
             variant="outline"
-            size="sm"
             onClick={() => setFolderModalOpen(true)}
-            className="gap-2"
+            className="gap-2 border-2 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200"
           >
             <FolderPlus className="h-4 w-4" />
             New Folder
@@ -236,103 +279,182 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       </div>
 
       {files.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <FolderOpen className="h-16 w-16 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No files here</h3>
-          <p className="text-muted-foreground max-w-sm">
-            This folder is empty. Upload files or create a new folder to get
-            started.
+        <div className="flex flex-col items-center justify-center h-64 text-center p-8 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200/50 dark:border-gray-700/50">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 mb-6">
+            <FolderOpen className="h-16 w-16 text-blue-500" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            No files here yet
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 max-w-sm">
+            This folder is empty. Upload your first files or create a new folder
+            to get started.
           </p>
         </div>
       ) : (
-        <>
+        <div className="space-y-8">
           {(() => {
             const sortedFolders = files.filter((file) => file.isFolder);
             const sortedFiles = files.filter((file) => !file.isFolder);
 
             return (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {sortedFolders.map((file) => (
-                    <Card
-                      key={file.id}
-                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] py-2 rounded-lg bg-gray-200"
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        enterFolder(file);
-                      }}
-                    >
-                      <CardContent className="flex gap-2 items-center">
-                        <Folder className="h-5 w-5 flex-shrink-0" />
-                        <h3 className="font-medium text-sm truncate flex-grow">
-                          {file.name}
-                        </h3>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {sortedFiles.map((file) => (
-                    <Card
-                      key={file.id}
-                      className="group relative cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] p-2 rounded-lg bg-gray-200"
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        if (file.type?.startsWith("image/")) {
-                          viewImage(file);
-                        }
-                      }}
-                    >
-                      <CardContent className="p-0 flex flex-col gap-2">
-                        <div className="flex items-center justify-between pl-2">
-                          <div className="flex items-center gap-2 flex-grow min-w-0">
-                            <ImageIcon className="h-5 w-5 flex-shrink-0" />
-                            <h3 className="font-medium text-sm truncate flex-grow">
+              <>
+                {sortedFolders.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <Folder className="h-5 w-5 text-blue-500" />
+                      Folders ({sortedFolders.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {sortedFolders.map((file) => (
+                        <Card
+                          key={file.id}
+                          className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] rounded-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm relative"
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            enterFolder(file);
+                          }}
+                        >
+                          <CardContent className="flex items-center gap-2">
+                            <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-900 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
+                              <Folder className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white truncate flex-grow">
                               {file.name}
                             </h3>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-shrink-0">
-                            {file.type && (
-                              <Badge className="text-xs bg-gray-500">
-                                {file.type.split("/")[1]?.toUpperCase() ||
-                                  "FILE"}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded-full ml-2 ${file.isFav ? "" : "opacity-60"}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStar(file);
+                              }}
+                              aria-label={file.isFav ? `Unstar ${file.name}` : `Star ${file.name}`}
+                              disabled={file.isTrash}
+                            >
+                              {file.isFav ? <Star className="h-4 w-4 fill-yellow-400" /> : <StarOff className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900 rounded-full ml-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTrash(file);
+                              }}
+                              aria-label={`Move ${file.isFolder ? "folder" : "file"} ${file.name} to trash`}
+                              disabled={file.isTrash}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                        <div>
-                          <img
-                            src={`${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                            style={{ objectFit: "contain" }}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+                {sortedFiles.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <File className="h-5 w-5 text-green-500" />
+                      Files ({sortedFiles.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {sortedFiles.map((file) => (
+                        <Card
+                          key={file.id}
+                          className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] rounded-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-sm overflow-hidden relative"
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            if (file.type?.startsWith("image/")) {
+                              viewImage(file);
+                            }
+                          }}
+                        >
+                          <CardContent className="p-0">
+                            {file.type?.startsWith("image/") && file.path ? (
+                              <div className="relative">
+                                <img
+                                  src={`${process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT}/${file.path}`}
+                                  alt={file.name}
+                                  className="w-full h-48 object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              </div>
+                            ) : (
+                              <div className="h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                                <File className="h-12 w-12 text-gray-400" />
+                              </div>
+                            )}
+
+                            <div className="p-4">
+                              <div className="flex items-center justify-between gap-2">
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate flex-grow">
+                                  {file.name}
+                                </h3>
+                                {file.type && (
+                                  <Badge className="text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                                    {file.type.split("/")[1]?.toUpperCase() ||
+                                      "FILE"}
+                                  </Badge>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={`text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900 rounded-full ml-2 ${file.isFav ? "" : "opacity-60"}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStar(file);
+                                  }}
+                                  aria-label={file.isFav ? `Unstar ${file.name}` : `Star ${file.name}`}
+                                  disabled={file.isTrash}
+                                >
+                                  {file.isFav ? <Star className="h-4 w-4 fill-yellow-400" /> : <StarOff className="h-4 w-4" />}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900 rounded-full ml-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTrash(file);
+                                  }}
+                                  aria-label={`Move ${file.isFolder ? "folder" : "file"} ${file.name} to trash`}
+                                  disabled={file.isTrash}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             );
           })()}
-        </>
+        </div>
       )}
 
       <Dialog open={folderModalOpen} onOpenChange={setFolderModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FolderPlus className="h-5 w-5 text-primary" />
-              <span>Create New Folder</span>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600">
+                <FolderPlus className="h-5 w-5 text-white" />
+              </div>
+              Create New Folder
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Enter a name for your new folder. This will help you organize your
               files better.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-6">
             <Input
               type="text"
               placeholder="My Images"
@@ -344,21 +466,22 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                 }
               }}
               autoFocus
-              className="h-12"
+              className="h-12 rounded-xl border-2 focus:ring-4 focus:ring-purple-500/20"
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button
               variant="outline"
               onClick={() => setFolderModalOpen(false)}
               disabled={creatingFolder}
+              className="rounded-xl"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateFolder}
               disabled={!folderName.trim() || creatingFolder}
-              className="gap-2"
+              className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl"
             >
               {creatingFolder ? (
                 <>
@@ -377,24 +500,32 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
       </Dialog>
 
       <Dialog open={imgDialogOpen} onOpenChange={setImgDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-4xl rounded-xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5 text-primary" />
-              <span>{dialogImgName}</span>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
+                <Image className="h-5 w-5 text-white" />
+              </div>
+              {dialogImgName}
             </DialogTitle>
           </DialogHeader>
           {dialogImgUrl && (
-            <img
-              src={dialogImgUrl}
-              alt={dialogImgName || "image"}
-              className="max-w-full max-h-[60vh] rounded shadow"
-              style={{ objectFit: "contain" }}
-            />
+            <div className="py-4">
+              <img
+                src={dialogImgUrl}
+                alt={dialogImgName || "image"}
+                className="max-w-full max-h-[70vh] rounded-2xl shadow-lg mx-auto"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImgDialogOpen(false)}>
-              Cancel
+            <Button
+              variant="outline"
+              onClick={() => setImgDialogOpen(false)}
+              className="rounded-xl"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
