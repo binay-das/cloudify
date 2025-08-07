@@ -542,7 +542,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                 <Home className="h-3 w-3 text-blue-500" />
                 <span className="text-gray-900 dark:text-white">Root</span>
                 {folderPath.map((folder, index) => (
-                  <div key={folder.id} className="flex items-center gap-1">
+                  <div key={folder.id || `fallback-${index}`} className="flex items-center gap-1">
                     <ChevronRight className="h-3 w-3 text-gray-400" />
                     <Button
                       variant="ghost"
@@ -768,7 +768,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
                             {sortedFolders.map((file, index) => (
                               <motion.div
-                                key={file.id}
+                                key={file.id || `fallback-${index}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
@@ -878,7 +878,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                           <div className="space-y-1">
                             {sortedFolders.map((file, index) => (
                               <motion.div
-                                key={file.id}
+                                key={file.id || `fallback-${index}`}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
@@ -996,7 +996,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
                             {sortedFiles.map((file, index) => (
                               <motion.div
-                                key={file.id}
+                                key={file.id || `fallback-${index}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
@@ -1210,7 +1210,7 @@ export default function FileList({ userId, onCreateFolder }: FileListProps) {
                           <div className="space-y-1">
                             {sortedFiles.map((file, index) => (
                               <motion.div
-                                key={file.id}
+                                key={file.id || `fallback-${index}`}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
