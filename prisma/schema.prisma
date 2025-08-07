@@ -40,3 +40,9 @@ model File {
 
   children File[] @relation("FileToFile")
 }
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
