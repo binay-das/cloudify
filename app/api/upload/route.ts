@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const imagekit = new ImageKit({
-    publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+    publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
     privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
     urlEndpoint: process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT!,
 });
@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const file = formData.get("file") as File;
         const parentId = formData.get("parentId") as string | null;
+
+        console.log("Upload API - parentId:", parentId);
 
         if (!file) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });

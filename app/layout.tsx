@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ImageKitProvider } from "@imagekit/next";
+import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,12 @@ export default function RootLayout({
         <ImageKitProvider
           urlEndpoint={process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT!}
         >
-          <Providers>{children}</Providers>
+          <Providers>
+            <TooltipProvider>
+            {children}
+            <Toaster />
+            </TooltipProvider>
+          </Providers>
         </ImageKitProvider>
       </body>
     </html>

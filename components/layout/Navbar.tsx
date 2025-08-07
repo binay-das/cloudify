@@ -13,9 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   FolderKanban, 
-  User, 
   LogOut, 
-  Files, 
   Menu, 
   X,
   Settings,
@@ -59,7 +57,7 @@ export default function Navbar() {
             href="/contact"
             className="text-sm font-medium text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors duration-200 relative group"
           >
-            Contact
+            Contact the Dev
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-200"></span>
           </Link>
         </nav>
@@ -92,8 +90,8 @@ export default function Navbar() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage 
-                        src={session.user?.image} 
-                        alt={session.user?.name} 
+                        src={session.user?.image as string} 
+                        alt={session.user?.name as string} 
                       />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
                         {getUserInitials(session.user?.name)}
@@ -186,8 +184,8 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage 
-                      src={session.user?.image} 
-                      alt={session.user?.name} 
+                      src={session.user?.image as string} 
+                      alt={session.user?.name as string} 
                     />
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
                       {getUserInitials(session.user?.name)}

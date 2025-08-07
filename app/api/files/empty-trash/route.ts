@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 const imagekit = new ImageKit({
   publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "",
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
-  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "",
+  urlEndpoint: process.env.NEXT_PUBLIC_IMAGE_KIT_URL_END_POINT || "",
 });
 
 export async function DELETE() {
@@ -51,7 +51,12 @@ export async function DELETE() {
               });
 
               if (searchResults && searchResults.length > 0) {
-                await imagekit.deleteFile(searchResults[0].fileId);
+                const result = searchResults[0];
+                if ('fileId' in result) {
+                  await imagekit.deleteFile(result.fileId);
+                } else {
+                  await imagekit.deleteFile(imagekitFileId);
+                }
               } else {
                 await imagekit.deleteFile(imagekitFileId);
               }

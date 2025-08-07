@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
 
         const { name, parentId = null } = await req.json();
 
+        console.log("Folders API - parentId:", parentId);
+
         if (!name || typeof name !== "string" || name.trim() === "") {
             return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
         }
